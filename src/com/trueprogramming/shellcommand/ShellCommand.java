@@ -16,6 +16,7 @@ public class ShellCommand {
 
     private final String command;
     private int exitValue;
+    private StringBuilder output;
 
     public ShellCommand(String command) {
         this.command = command;
@@ -26,11 +27,11 @@ public class ShellCommand {
         processBuilder.command("bash", "-c", this.command);
         try {
             Process process = processBuilder.start();
-            StringBuilder output = new StringBuilder();
+            this.output = new StringBuilder();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+                this.output.append(line).append("\n");
             }
             this.exitValue = process.waitFor();
             if (this.exitValue == 0) {
@@ -40,18 +41,26 @@ public class ShellCommand {
                 throw new ShellCommandException(this.command, this.exitValue, "", null);
             }
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "this.exitVal" + this.exitValue + " Exception:" + e.getMessage());
+            LOG.log(Level.SEVERE, "this.exitVal{0} Exception:{1}", new Object[]{this.exitValue, e.getMessage()});
             throw new ShellCommandException(this.command, this.exitValue, "", e);
         } catch (InterruptedException e) {
-            LOG.log(Level.SEVERE, "this.exitVal" + this.exitValue + " Exception:" + e.getMessage());
+            LOG.log(Level.SEVERE, "this.exitVal{0} Exception:{1}", new Object[]{this.exitValue, e.getMessage()});
             throw new ShellCommandException(this.command, this.exitValue, "", e);
         }
+    }
+
+    public int getExitValue() {
+        return exitValue;
+    }
+
+    public StringBuilder getOutput() {
+        return output;
     }
 
     public static void main(String... args) {
         try {
             String command = "ls /home/mcaliman/";
-            LOG.log(Level.INFO, "Execute: " + command);
+            LOG.log(Level.INFO, "Execute: {0}", command);
             ShellCommand cmd = new ShellCommand(command);
             cmd.execute();
         } catch (ShellCommandException ex) {
