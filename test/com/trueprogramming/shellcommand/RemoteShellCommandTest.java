@@ -11,12 +11,15 @@ import static org.junit.Assert.fail;
  */
 public class RemoteShellCommandTest {
 
+    private final static String HOST = "192.168.1.73";
+    private final static int PORT = 22;
+    
     /**
      * Test of main method, of class RemoteShellCommand.
      */
     @Test
     public void testMain() {
-        RemoteShellCommand cmd = new RemoteShellCommand("192.168.1.73", 22, "mcaliman", "", "ls -la /home/mcaliman/Scrivania");
+        RemoteShellCommand cmd = new RemoteShellCommand(HOST, PORT, "mcaliman", "", "ls -la /home/mcaliman/Scrivania");
         try {
             cmd.execute();
             int exit = cmd.getExitValue();
@@ -32,7 +35,7 @@ public class RemoteShellCommandTest {
     /**
      * Test of getExitValue method, of class RemoteShellCommand.
      */
-    //@Test
+    @Test
     public void testGetExitValue() {
         System.out.println("getExitValue");
         RemoteShellCommand instance = new RemoteShellCommand("", 0, "", "", "");
@@ -44,7 +47,7 @@ public class RemoteShellCommandTest {
     /**
      * Test of getOutput method, of class RemoteShellCommand.
      */
-    //@Test
+    @Test
     public void testGetOutput() {
         System.out.println("getOutput");
         RemoteShellCommand instance = new RemoteShellCommand("", 0, "", "", "");
