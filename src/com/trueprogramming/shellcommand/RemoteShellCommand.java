@@ -14,22 +14,15 @@ public class RemoteShellCommand implements ShellCommand {
     private final String password;
     private final String command;
 
+    private int exitValue;
+    private StringBuilder output;
+
     public RemoteShellCommand(String host, int port, String user, String password, String command) {
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
         this.command = command;
-    }
-
-    public static void main(String[] arg) {
-        RemoteShellCommand cmd = new RemoteShellCommand("192.168.1.73", 22, "mcaliman", "secret", "ls -la /home/mcaliman/Scrivania");
-        try {
-            cmd.execute();
-        } catch (ShellCommandException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
-
     }
 
     @Override
@@ -52,20 +45,23 @@ public class RemoteShellCommand implements ShellCommand {
             channel.connect();
 
             byte[] tmp = new byte[1024];
-
+            this.output = new StringBuilder();
             while (true) {
                 while (in.available() > 0) {
                     int i = in.read(tmp, 0, 1024);
                     if (i < 0) {
                         break;
                     }
-                    System.out.println(new String(tmp, 0, i));
+                    String text = new String(tmp, 0, i);
+                    this.output.append(text);
+                    //System.out.println(text);
                 }
                 if (channel.isClosed()) {
                     if (in.available() > 0) {
                         continue;
                     }
-                    System.out.println("exit-status: " + channel.getExitStatus());
+                    this.exitValue = channel.getExitStatus();
+                    //System.out.println("exit-status: " + this.exitValue);
                     break;
                 }
                 try {
@@ -85,12 +81,12 @@ public class RemoteShellCommand implements ShellCommand {
 
     @Override
     public int getExitValue() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.exitValue;
     }
 
     @Override
     public StringBuilder getOutput() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.output;
     }
 
     public static class RemoteUserInfo implements UserInfo {
